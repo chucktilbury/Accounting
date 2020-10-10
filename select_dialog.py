@@ -3,11 +3,14 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from database import Database
 from search_widget import searchWidget
+from logger import *
 
+@class_wrapper
 class SelectDialog(tk.Toplevel):
 
     def __init__(self, owner, table, column, thing=None):
         super().__init__(owner)
+        self.logger.set_level(Logger.DEBUG)
 
         self.table = table
         self.column = column
@@ -39,10 +42,12 @@ class SelectDialog(tk.Toplevel):
         w.grid(row=0, column=1, sticky='w')
         self.wait_window(self)
 
+    @func_wrapper
     def _ok_btn(self):
         id = self.data.get_id_by_column(self.table, self.column, self.cbb.get())
         self.item_id = id
         self.destroy()
 
+    @func_wrapper
     def _cancel_btn(self):
         self.destroy()

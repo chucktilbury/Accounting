@@ -4,6 +4,7 @@ import tkinter.font as font
 from tkinter.messagebox import *
 from database import Database
 from form_widgets import toolTip
+from logger import *
 
 swtt = \
 '''
@@ -13,10 +14,12 @@ to see the list of current matches. Choose one and
 select the "OK" button.
 '''
 
+@class_wrapper
 class searchWidget(ttk.Combobox):
 
     def __init__(self, owner, table, column, tool_tip=swtt, **kw):
         super().__init__(owner, **kw)
+        self.logger.set_level(Logger.DEBUG)
 
         self.table = table
         self.column = column

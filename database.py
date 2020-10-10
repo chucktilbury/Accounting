@@ -6,7 +6,8 @@ that interfaces to the form widgets.
 import sqlite3 as sql
 import os, time, locale
 from tkinter.messagebox import showerror
-
+from logger import *
+@class_wrapper
 class Database(object):
 
     __instance = None
@@ -19,6 +20,7 @@ class Database(object):
 
     def __init__(self):
 
+        self.logger.set_level(Logger.DEBUG)
         if Database.__instance is None:
             Database.__instance = self
         else:
@@ -33,6 +35,7 @@ class Database(object):
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
         self.db.execute('PRAGMA case_sensitive_like = false;')
 
+    @func_wrapper
     def open(self):
         '''
         High level database open routine. Handles creating the database if it's not found.
@@ -43,6 +46,7 @@ class Database(object):
         self.db = sql.connect(self.database_name)
         self.db.row_factory = sql.Row
 
+    @func_wrapper
     def close(self):
         '''
         Close the database after committing all of the changes.
@@ -50,6 +54,7 @@ class Database(object):
         self.db.commit()
         self.db.close()
 
+    @func_wrapper
     def read_statement(self, fh):
         '''
         Read a statement from the *.sql file and return it. This skips comments and concatinates lines
@@ -70,6 +75,7 @@ class Database(object):
 
         return retv
 
+    @func_wrapper
     def run_file(self, db, name):
         '''
         Execute all of the statements in a *.sql file.
@@ -83,6 +89,7 @@ class Database(object):
                 else:
                     break
 
+    @func_wrapper
     def create_database(self):
         '''
         Create the database if it does not exist already.
@@ -96,12 +103,14 @@ class Database(object):
         c.commit()
         c.close()
 
+    @func_wrapper
     def commit(self):
         '''
         Commit all changes to the database.
         '''
         self.db.commit()
 
+    @func_wrapper
     def execute(self, _sql, data = None):
         '''
         Execute a single SQL statement.
@@ -115,6 +124,7 @@ class Database(object):
         except sql.IntegrityError as e:
             showerror('ERROR', str(e))
 
+    @func_wrapper
     def read_single_value(self, table, column, row_id):
         '''
         Read a single value from the database.
@@ -133,6 +143,7 @@ class Database(object):
 
         return retv
 
+    @func_wrapper
     def write_single_value(self, table, column, row_id, value):
         '''
         Write a single value to the database.
@@ -142,6 +153,7 @@ class Database(object):
 
         return self.execute(sql, vals)
 
+    @func_wrapper
     def get_column_list(self, table, column):
         '''
         Returns a list of column values in all lines of the table.
@@ -152,6 +164,7 @@ class Database(object):
             retv.append(' '.join(item))
         return retv
 
+    @func_wrapper
     def get_row_id(self, table, column, value):
         '''
         Find the ID of the row that has this column value. If there are
@@ -169,6 +182,7 @@ class Database(object):
         else:
             return dict(row[0])['ID']
 
+    @func_wrapper
     def get_id_list(self, table, where=None):
         '''
         Get a list of all IDs in a table. This is used (generally) to implement
@@ -185,6 +199,7 @@ class Database(object):
 
         return retv
 
+    @func_wrapper
     def get_id_by_column(self, table, column, val):
         '''
         Return a dictionary of the columns in the row where a data element matches the
@@ -201,6 +216,7 @@ class Database(object):
         else:
             return dict(row[0])['ID']
 
+    @func_wrapper
     def insert_row(self, table, data):
         '''
         Insert a row into the database. The data parameter is a dictionary where the
@@ -220,6 +236,7 @@ class Database(object):
             showerror('ERROR', str(e))
             return None
 
+    @func_wrapper
     def delete_row(self, table, row_id):
         '''
         Delete the row with the given ID.
@@ -227,6 +244,7 @@ class Database(object):
         sql = 'DELETE FROM %s WHERE ID = %d;' % (table, row_id)
         return self.db.execute(sql)
 
+    @func_wrapper
     def check_dups(self, table, column, value):
         '''
         Return a list of rows that look similar to the value for that column.

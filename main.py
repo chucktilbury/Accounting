@@ -23,6 +23,7 @@ class MainFrame(object):
 
         self.data = Database.get_instance()
         self.master = master
+        self.logger.set_level(Logger.DEBUG)
 
         menubar = tk.Menu(self.master)
         filemenu = tk.Menu(menubar, tearoff=0)

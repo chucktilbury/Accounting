@@ -11,6 +11,7 @@ import tkinter.ttk as ttk
 import tkinter.font as font
 from tkinter.messagebox import *
 from database import Database
+from logger import *
 
 class toolTip:
     '''
@@ -42,6 +43,7 @@ class toolTip:
         if self.tw:
             self.tw.destroy()
 
+@class_wrapper
 class _form_widget_base(tk.Frame):
     '''
     This class implements the basic functions for all of the form widgets and
@@ -50,6 +52,7 @@ class _form_widget_base(tk.Frame):
 
     def __init__(self, owner, table, column):
         super().__init__(owner)
+        self.logger.set_level(Logger.DEBUG)
         self.data = Database.get_instance()
         self.owner = owner
         self.table = table
@@ -57,23 +60,27 @@ class _form_widget_base(tk.Frame):
         self.row_id = None
         self.changed = False
 
+    @func_wrapper
     def getter(self):
         '''
         Stub function. The getter reads the widget and saves the data into the database as
         a single row/column entry.
         '''
 
+    @func_wrapper
     def setter(self):
         '''
         Stub function. The setter reads the database as a single row/column entry and saves
         it into the widget.
         '''
 
+    @func_wrapper
     def clear(self):
         '''
         Clears the widget.
         '''
 
+    @func_wrapper
     def populate(self):
         '''
         For compound widgets, this can grab a list from the database and place it into the
@@ -81,12 +88,14 @@ class _form_widget_base(tk.Frame):
         '''
         self.setter()
 
+    @func_wrapper
     def get_insert_value(self):
         '''
         This is used when inserting a new row into the database.
         '''
         return self.column, self._read_value()
 
+    @func_wrapper
     def _read_value(self):
         '''
         This is a "regular" way to obtain the value of a widget. This method must have an
@@ -94,12 +103,14 @@ class _form_widget_base(tk.Frame):
         '''
         raise Exception('The _read_value method not supported for this widget.')
 
+    @func_wrapper
     def set_row_id(self, row_id):
         '''
         This must be called before the value of the widget can be read or written.
         '''
         self.row_id = row_id
 
+    @func_wrapper
     def is_changed(self, clear_flag=False):
         '''
         Return whether the control has changed or not.
@@ -109,18 +120,21 @@ class _form_widget_base(tk.Frame):
             self.changed = False
         return val
 
+    @func_wrapper
     def get_column(self):
         '''
         Return the column.
         '''
         return self.column
 
+    @func_wrapper
     def get_table(self):
         '''
         Return the table.
         '''
         return self.table
 
+    @func_wrapper
     def check_dupes(self):
         '''
         Check for duplicate entries using the table and column along with the value
@@ -130,12 +144,14 @@ class _form_widget_base(tk.Frame):
         '''
         return self.data.check_dups(self.table, self.column, self._read_value())
 
+    @func_wrapper
     def _bind_key(self, event=None):
         '''
         Callback for key binding to detect if widget has changed.
         '''
         self.changed = True
 
+@class_wrapper
 class formEntry(_form_widget_base):
     '''
     Wrapper for the tkinter Entry widget.
@@ -143,6 +159,7 @@ class formEntry(_form_widget_base):
 
     def __init__(self, owner, table, column, _type, tool_tip=None, **kw):
         super().__init__(owner, table, column)
+        self.logger.set_level(Logger.DEBUG)
         self._type = _type
 
         self.value = tk.StringVar(self)
@@ -152,10 +169,12 @@ class formEntry(_form_widget_base):
         if not tool_tip is None:
             self.tool_tip = toolTip(self, tool_tip)
 
+    @func_wrapper
     def getter(self):
         val = self._read_value()
         self.data.write_single_value(self.table, self.column, self.row_id, val)
 
+    @func_wrapper
     def setter(self):
         state = self.widget.configure()['state']
         if state == 'readonly':
@@ -170,6 +189,7 @@ class formEntry(_form_widget_base):
         if state == 'readonly':
             self.widget.configure(state='readonly')
 
+    @func_wrapper
     def clear(self):
         state = self.widget.configure()['state']
         if state == 'readonly':
@@ -180,6 +200,7 @@ class formEntry(_form_widget_base):
         if state == 'readonly':
             self.widget.configure(state='readonly')
 
+    @func_wrapper
     def _read_value(self):
         val = self._type(self.value.get())
         # This enforces the NOT NULL clause in the database structure
@@ -188,10 +209,12 @@ class formEntry(_form_widget_base):
         else:
             return val
 
+@class_wrapper
 class formText(_form_widget_base):
 
     def __init__(self, owner, table, column, tool_tip=None, **kw):
         super().__init__(owner, table, column)
+        self.logger.set_level(Logger.DEBUG)
 
         self.local_frame = tk.Frame(self, bd=1, relief=tk.RIDGE)
         self.widget = tk.Text(self.local_frame, wrap=tk.NONE, **kw)
@@ -213,26 +236,32 @@ class formText(_form_widget_base):
         if not tool_tip is None:
             self.tool_tip = toolTip(self, tool_tip)
 
+    @func_wrapper
     def getter(self):
         value = self._read_value()
         self.data.write_single_value(self.table, self.column, self.row_id, value)
 
+    @func_wrapper
     def setter(self):
         value = self.data.read_single_value(self.table, self.column, self.row_id)
         self.widget.delete('1.0', tk.END)
         if not value is None:
             self.widget.insert(tk.END, str(value))
 
+    @func_wrapper
     def clear(self):
         self.widget.delete('1.0', tk.END)
 
+    @func_wrapper
     def _read_value(self):
         return self.widget.get(1.0, tk.END)
 
+@class_wrapper
 class formCombobox(_form_widget_base):
 
     def __init__(self, owner, val_tab, val_col, pop_tab, pop_col, tool_tip=None, **kw):
         super().__init__(owner, val_tab, val_col)
+        self.logger.set_level(Logger.DEBUG)
 
         self.pop_tab = pop_tab
         self.pop_col = pop_col
@@ -244,31 +273,38 @@ class formCombobox(_form_widget_base):
         if not tool_tip is None:
             self.tool_tip = toolTip(self, tool_tip)
 
+    @func_wrapper
     def getter(self):
         value = self._read_value()
         self.data.write_single_value(self.table, self.column, self.row_id, value)
 
+    @func_wrapper
     def setter(self):
         self.populate()
         value = self.data.read_single_value(self.table, self.column, self.row_id)
         self.widget.current(int(value)-1)
 
+    @func_wrapper
     def clear(self):
         try:
             self.widget.current(0)
         except tk.TclError:
             pass # empty content is not an error
 
+    @func_wrapper
     def populate(self):
         self.widget['values'] = self.data.get_column_list(self.pop_tab, self.pop_col)
 
+    @func_wrapper
     def _read_value(self):
         return self.widget.current()+1
 
+@class_wrapper
 class formDynamicLabel(_form_widget_base):
 
     def __init__(self, owner, table, column, tool_tip=None, **kw):
         super().__init__(owner, table, column)
+        self.logger.set_level(Logger.DEBUG)
 
         self.value = tk.StringVar(self)
         self.widget = tk.Label(self, textvariable=self.value, **kw)
@@ -276,6 +312,7 @@ class formDynamicLabel(_form_widget_base):
         if not tool_tip is None:
             self.tool_tip = toolTip(self, tool_tip)
 
+    @func_wrapper
     def setter(self):
         value = self.data.read_single_value(self.table, self.column, self.row_id)
         if value is None:
@@ -283,10 +320,12 @@ class formDynamicLabel(_form_widget_base):
         else:
             self.value.set(str(value))
 
+@class_wrapper
 class formIndirectLabel(_form_widget_base):
 
     def __init__(self, owner, val_tab, val_col, rem_tab, rem_col, tool_tip=None, **kw):
         super().__init__(owner, val_tab, val_col)
+        self.logger.set_level(Logger.DEBUG)
 
         self.rem_tab = rem_tab
         self.rem_col = rem_col
@@ -297,6 +336,7 @@ class formIndirectLabel(_form_widget_base):
         if not tool_tip is None:
             self.tool_tip = toolTip(self, tool_tip)
 
+    @func_wrapper
     def getter(self):
         # This is the name
         value = self.value.get()
@@ -305,6 +345,7 @@ class formIndirectLabel(_form_widget_base):
         # set the value with the row_id
         self.data.write_single_value(self.table, self.column, self.row_id, id)
 
+    @func_wrapper
     def setter(self):
         # this is the ID
         id = self.data.read_single_value(self.table, self.column, self.row_id)
@@ -313,24 +354,30 @@ class formIndirectLabel(_form_widget_base):
         # set the widget value
         self.value.set(str(value))
 
+    @func_wrapper
     def clear(self):
         self.value.set('')
 
-    def _read_value(self):
-        return self.data.get_row_id(self.rem_tab, self.rem_col, value)
+    # @func_wrapper
+    # def _read_value(self):
+    #     return self.data.get_row_id(self.rem_tab, self.rem_col, value)
 
+@class_wrapper
 class formTitle(_form_widget_base):
 
     def __init__(self, owner, value, **kw):
         super().__init__(owner, None, None)
+        self.logger.set_level(Logger.DEBUG)
 
         self.widget = tk.Label(self, text=value, font=("Helvetica", 14), **kw)
         self.widget.grid()
 
+@class_wrapper
 class formCheckbox(_form_widget_base):
 
     def __init__(self, owner, table, column, tool_tip=None, **kw):
         super().__init_(owner, table, column)
+        self.logger.set_level(Logger.DEBUG)
 
         self.value = tk.BooleanVar()
         self.widget = tk.Checkbutton(self, var=self.value, command=self._bind_key, **kw)
@@ -338,17 +385,21 @@ class formCheckbox(_form_widget_base):
         if not tool_tip is None:
             self.tool_tip = toolTip(self, tool_tip)
 
+    @func_wrapper
     def getter(self):
         val = self._read_value()
         self.data.write_single_value(self.table, self.column, self.row_id, val)
 
+    @func_wrapper
     def setter(self):
         val = self.data.read_single_value(self.table, self.column, self.row_id)
         self.value.set(val)
 
+    @func_wrapper
     def clear(self):
         self.value.set(0)
 
+    @func_wrapper
     def _read_value(self):
         return self.int(self.value.get())
 

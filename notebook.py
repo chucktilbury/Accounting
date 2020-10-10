@@ -17,6 +17,7 @@ class Notebook(tk.Frame):
         **kw    =   Named args passed to the frame.
         '''
         super().__init__(owner, **kw)
+        self.logger.set_level(Logger.DEBUG)
 
         self.owner = owner
         self.frame_list = []

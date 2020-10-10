@@ -1,6 +1,8 @@
 import tkinter as tk
 from forms import Forms
+from logger import *
 
+@class_wrapper
 class _text_form(Forms):
 
     def __init__(self, owner, table, column, row_index):
@@ -13,6 +15,7 @@ class _text_form(Forms):
         self.add_ctl_button('Save')
 
 
+@class_wrapper
 class TextDialog(tk.Toplevel):
     '''
     Display a text edit form and possibly save the results.
@@ -34,6 +37,7 @@ class TextDialog(tk.Toplevel):
         self.cf.load_form()
         self.wait_window(self)
 
+    @func_wrapper
     def _dismiss_btn(self):
         self.cf.check_save()
         self.destroy()

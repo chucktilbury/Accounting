@@ -20,7 +20,9 @@ column.
 from database import Database
 from form_widgets import *
 from select_dialog import SelectDialog
+from logger import *
 
+@class_wrapper
 class Forms(tk.LabelFrame):
 
     def __init__(self, owner, table, columns=4, form_width=700, **kw):
@@ -76,6 +78,7 @@ class Forms(tk.LabelFrame):
         self.new_flag = False
         self.grid()
 
+    @func_wrapper
     def add_dupe_check(self, wid):
         '''
         Add a duplicate check using a widget from the form_widgets. The widget
@@ -85,6 +88,7 @@ class Forms(tk.LabelFrame):
         self.dup_wids.append(wid)
 
     # Methods that add control widgets to the form
+    @func_wrapper
     def add_label(self, text, **kw):
         '''
         Add a dead label to the form. This could be considered part of a control,
@@ -95,6 +99,7 @@ class Forms(tk.LabelFrame):
         self._grid(widget, 1, sticky='e')
         return widget
 
+    @func_wrapper
     def add_title(self, text, **kw):
         '''
         A title spans all columns of the form and usually goes at the top or bottom
@@ -104,6 +109,7 @@ class Forms(tk.LabelFrame):
         self._grid(widget, self.columns)
         return widget
 
+    @func_wrapper
     def add_entry(self, column, cols, _type, ttip=None, **kw):
         '''
         This is the formEntry control.
@@ -113,6 +119,7 @@ class Forms(tk.LabelFrame):
         self.ctl_list.append(widget)
         return widget
 
+    @func_wrapper
     def add_text(self, column, cols, ttip=None, **kw):
         '''
         This is the formText control.
@@ -122,6 +129,7 @@ class Forms(tk.LabelFrame):
         self.ctl_list.append(widget)
         return widget
 
+    @func_wrapper
     def add_combo(self, column, cols, pop_tab, pop_col, ttip=None, **kw):
         '''
         This is the formCombobox control.
@@ -131,6 +139,7 @@ class Forms(tk.LabelFrame):
         self.ctl_list.append(widget)
         return widget
 
+    @func_wrapper
     def add_dynamic_label(self, column, cols, ttip=None, **kw):
         '''
         This is the formDynamicLabel control.
@@ -140,6 +149,7 @@ class Forms(tk.LabelFrame):
         self.ctl_list.append(widget)
         return widget
 
+    @func_wrapper
     def add_indirect_label(self, column, cols, rem_tab, rem_col, ttip=None, **kw):
         '''
         This is the formIndirectLabel control.
@@ -149,6 +159,7 @@ class Forms(tk.LabelFrame):
         self.ctl_list.append(widget)
         return widget
 
+    @func_wrapper
     def add_checkbox(self, column, cols, ttip=None, **kw):
         '''
         This is the formCheckbox control.
@@ -158,6 +169,7 @@ class Forms(tk.LabelFrame):
         self.ctl_list.append(widget)
         return widget
 
+    @func_wrapper
     def add_custom_widget(self, cols, cls, ttip=None, **kw):
         '''
         This is any widget that has a self-contained class.
@@ -167,6 +179,7 @@ class Forms(tk.LabelFrame):
         self.ctl_list.append(widget)
         return widget
 
+    @func_wrapper
     def add_spacer(self, cols):
         '''
         This is an empty tk.Frame to simply take up spade.
@@ -177,6 +190,7 @@ class Forms(tk.LabelFrame):
 
 
     # Methods that add button widgets to the form
+    @func_wrapper
     def add_ctl_button(self, title, column=None, class_name=None, thing=None, **kw):
         '''
         This adds a known control button to the form.
@@ -213,6 +227,7 @@ class Forms(tk.LabelFrame):
         self.btn_row += 1
         return widget
 
+    @func_wrapper
     def add_custom_button(self, cls, **kw):
         '''
         This adds a custom button from a self-contained class.
@@ -222,6 +237,7 @@ class Forms(tk.LabelFrame):
         self.btn_row += 1
         return widget
 
+    @func_wrapper
     def add_btn_spacer(self):
         '''
         Adds a space between buttons.
@@ -233,6 +249,7 @@ class Forms(tk.LabelFrame):
 
 
     # Methods that control the form
+    @func_wrapper
     def load_form(self):
         '''
         Call all of the setter functions for all of the widgets.
@@ -246,6 +263,7 @@ class Forms(tk.LabelFrame):
             item.setter() # set the widget value
             item.is_changed(clear_flag=True) # reset the changed flag
 
+    @func_wrapper
     def save_form(self):
         '''
         Call all of the getter functions for all of the widgets.
@@ -277,6 +295,7 @@ class Forms(tk.LabelFrame):
         self.data.commit()
         showinfo('Info', 'Form saved.')
 
+    @func_wrapper
     def show_form(self):
         '''
         Load the current row into the form and then place it in the owner's
@@ -285,6 +304,7 @@ class Forms(tk.LabelFrame):
         self.grid()
         self.load_form()
 
+    @func_wrapper
     def hide_form(self):
         '''
         Call grid_forget() on this form.
@@ -292,6 +312,7 @@ class Forms(tk.LabelFrame):
         self.grid_forget()
 
     # Standard button callbacks
+    @func_wrapper
     def _next_btn(self):
         '''
         Get the next row in the table and load the form.
@@ -305,6 +326,7 @@ class Forms(tk.LabelFrame):
             else:
                 self.load_form()
 
+    @func_wrapper
     def _prev_btn(self):
         '''
         Get the previous row in the database and load the form.
@@ -318,6 +340,7 @@ class Forms(tk.LabelFrame):
             else:
                 self.load_form()
 
+    @func_wrapper
     def _clear_btn(self):
         '''
         Clear the form or open the edit dialog.
@@ -325,6 +348,7 @@ class Forms(tk.LabelFrame):
         for item in self.ctl_list:
             item.clear()
 
+    @func_wrapper
     def _save_btn(self):
         '''
         Call all of the getter functions for all of the controls and
@@ -351,6 +375,7 @@ class Forms(tk.LabelFrame):
             #if askyesno('Save Record?', 'Are you sure you want to save this?'):
             self.save_form()
 
+    @func_wrapper
     def _delete_btn(self):
         '''
         Delete the current row from the database and load the next one.
@@ -364,6 +389,7 @@ class Forms(tk.LabelFrame):
                 self.row_index -= 1
             self.load_form()
 
+    @func_wrapper
     def _edit_btn(self, _class):
         '''
         Call up the edit dialog for this table row.
@@ -371,6 +397,7 @@ class Forms(tk.LabelFrame):
         _class(self.owner, self.row_index)
         self.load_form()
 
+    @func_wrapper
     def _select_btn(self, column, thing=None):
         '''
         Open the select dialog and select from the column in the row.
@@ -385,6 +412,7 @@ class Forms(tk.LabelFrame):
             self.load_form()
         # else cancel was selected
 
+    @func_wrapper
     def _new_btn(self, _class):
         '''
         Simply create a new table record and store it in the database.
@@ -395,6 +423,7 @@ class Forms(tk.LabelFrame):
         self._init_row_list()
 
     # Other private functions
+    @func_wrapper
     def _get_geometry(self, wid):
         # Note that this does not work on frames or empty widgets.
         wid.update()
@@ -402,6 +431,7 @@ class Forms(tk.LabelFrame):
                 'hoffset':wid.winfo_x(), 'voffset':wid.winfo_y(),
                 'name':wid.winfo_name()}
 
+    @func_wrapper
     def _grid(self, ctrl, cols, **kw):
         '''
         This calls the grid function on the control and sets it in the proper
@@ -423,6 +453,7 @@ class Forms(tk.LabelFrame):
                         padx=self.ctl_xpad, pady=self.ctl_ypad, **kw)
             self.col += cols
 
+    @func_wrapper
     def _row_id(self):
         '''
         Return the current row_id
@@ -433,6 +464,7 @@ class Forms(tk.LabelFrame):
 
         return self.row_list[self.row_index]
 
+    @func_wrapper
     def _init_row_list(self):
         '''
         Create the row list.
@@ -443,6 +475,7 @@ class Forms(tk.LabelFrame):
         else:
             self.row_list = self.data.get_id_list(self.table)
 
+    @func_wrapper
     def check_save(self):
         '''
         Check if the form has changed and if it has, present a confirm dialog.

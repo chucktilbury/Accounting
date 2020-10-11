@@ -5,7 +5,7 @@ from tkinter.messagebox import showerror
 from tkinter.filedialog import asksaveasfilename as get_filename
 #import logging
 
-class _logger(tk.Toplevel): #(tk.Frame):
+class _logger(tk.Toplevel):
     '''
     This class is the base class that has the TK window that the logs go into. It is
     not intended to be inherited or used stand-alone. It is used by the Logger class
@@ -37,6 +37,14 @@ class _logger(tk.Toplevel): #(tk.Frame):
         self.win_frame = tk.Frame(self)
         self.text_frame = tk.Frame(self.win_frame, bd=1, relief=tk.RIDGE)
 
+        tk.Label(self.win_frame, text='Search:').grid(row=0, column=0, sticky='e')
+        self.srch_pattern = tk.StringVar()
+        entr = tk.Entry(self.win_frame, textvariable=self.srch_pattern)
+        entr.bind('<KeyRelease>', self.tag_pattern)
+        entr.grid(row=0, column=1, sticky='w')
+        tk.Button(self.win_frame, text='Clear Tags', command=self.clear_tags).grid(row=0, column=2, sticky='w')
+
+
         self.text = tk.Text(self.text_frame, wrap=tk.NONE, state='disabled', width=162, height=50)
         self.text.configure(font='TkFixedFont')
         #self.text.grid(row=0, column=0, columnspan=3, sticky='nw')
@@ -54,17 +62,18 @@ class _logger(tk.Toplevel): #(tk.Frame):
         self.hsb.pack(side='bottom', fill='x')
         self.text.pack(side='top', fill='both', expand=True)
 
-        self.text_frame.grid(row=0, column=0, columnspan=3)#, sticky='w')
+        self.text_frame.grid(row=1, column=0, columnspan=3)#, sticky='w')
 
 
-        tk.Button(self.win_frame, text='Save', width=15, command=self.save_cb).grid(row=1, column=0, sticky='e', padx=5)
-        tk.Button(self.win_frame, text='Clear', width=15, command=self.clear_cb).grid(row=1, column=1, padx=5)
-        tk.Button(self.win_frame, text='Hide', width=15, command=self.cancel_cb).grid(row=1, column=2, sticky='w', padx=5)
+        tk.Button(self.win_frame, text='Save', width=15, command=self.save_cb).grid(row=2, column=0, sticky='e', padx=5)
+        tk.Button(self.win_frame, text='Clear', width=15, command=self.clear_cb).grid(row=2, column=1, padx=5)
+        tk.Button(self.win_frame, text='Hide', width=15, command=self.cancel_cb).grid(row=2, column=2, sticky='w', padx=5)
 
         self.win_frame.grid()
 
         self.withdraw() # hidden by default
         self.enabled = False
+        self.tag = self.text.tag_config('tagMarker', background='black', foreground='white')
 
     def destroy(self):
         '''
@@ -128,6 +137,41 @@ class _logger(tk.Toplevel): #(tk.Frame):
         '''
         self.disable()
         self.enabled = False
+
+    def tag_pattern(self, event=None):
+        '''
+        Highlight every instance of the pattern in the text widget.
+        If regex is True, then treat the pattern as a TCL regular
+        expression.
+        '''
+        start="1.0"
+        end="end"
+
+        self.clear_tags()
+        self.text.index(start)
+        self.text.index(end)
+        self.text.mark_set('matchStart', start)
+        self.text.mark_set('matchEnd', start)
+        self.text.mark_set('searchLimit', end)
+
+        count = tk.IntVar()
+        while True:
+            index = self.text.search(self.srch_pattern.get(), 'matchEnd', 'searchLimit',
+                                        count=count, regexp=False)
+            if index == '':
+                break
+            if count.get() == 0:
+                break
+
+            self.text.mark_set('matchStart', index)
+            self.text.mark_set('matchEnd', '%s+%sc'%(index, count.get()))
+            self.text.tag_add('tagMarker', 'matchStart', 'matchEnd')
+
+    def clear_tags(self):
+        '''
+        Clear all of the tags that have been defined in the text.
+        '''
+        self.text.tag_remove('tagMarker', '1.0', 'end')
 
 
 class Logger:

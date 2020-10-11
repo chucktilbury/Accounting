@@ -37,33 +37,30 @@ class _logger(tk.Toplevel):
         self.win_frame = tk.Frame(self)
         self.text_frame = tk.Frame(self.win_frame, bd=1, relief=tk.RIDGE)
 
-        tk.Label(self.win_frame, text='Search:').grid(row=0, column=0, sticky='e')
+        top_frame = tk.Frame(self.win_frame)
+        top_frame.grid(row=0, column=0, columnspan=3)
+        tk.Label(top_frame, text='Search:').grid(row=0, column=0, sticky='e')
         self.srch_pattern = tk.StringVar()
-        entr = tk.Entry(self.win_frame, textvariable=self.srch_pattern)
+        entr = tk.Entry(top_frame, textvariable=self.srch_pattern)
         entr.bind('<KeyRelease>', self.tag_pattern)
         entr.grid(row=0, column=1, sticky='w')
-        tk.Button(self.win_frame, text='Clear Tags', command=self.clear_tags).grid(row=0, column=2, sticky='w')
-
+        tk.Button(top_frame, text='Clear Tags', command=self.clear_tags).grid(row=0, column=2, sticky='w')
 
         self.text = tk.Text(self.text_frame, wrap=tk.NONE, state='disabled', width=162, height=50)
         self.text.configure(font='TkFixedFont')
-        #self.text.grid(row=0, column=0, columnspan=3, sticky='nw')
 
         self.vsb = tk.Scrollbar(self.text_frame, orient='vertical')
         self.vsb.config(command=self.text.yview)
         self.text.config(yscrollcommand=self.vsb.set)
-        #self.vsb.grid(row=0, column=1, sticky='nse')#'nws')
         self.vsb.pack(side='right', fill='y')
 
         self.hsb = tk.Scrollbar(self.text_frame, orient='horizontal')
         self.hsb.config(command=self.text.xview)
         self.text.config(xscrollcommand=self.hsb.set)
-        #self.hsb.grid(row=1, column=0, sticky='ews')#'ewn')
         self.hsb.pack(side='bottom', fill='x')
         self.text.pack(side='top', fill='both', expand=True)
 
         self.text_frame.grid(row=1, column=0, columnspan=3)#, sticky='w')
-
 
         tk.Button(self.win_frame, text='Save', width=15, command=self.save_cb).grid(row=2, column=0, sticky='e', padx=5)
         tk.Button(self.win_frame, text='Clear', width=15, command=self.clear_cb).grid(row=2, column=1, padx=5)
@@ -147,7 +144,7 @@ class _logger(tk.Toplevel):
         start="1.0"
         end="end"
 
-        self.clear_tags()
+        self.text.tag_remove('tagMarker', '1.0', 'end')
         self.text.index(start)
         self.text.index(end)
         self.text.mark_set('matchStart', start)
@@ -172,7 +169,7 @@ class _logger(tk.Toplevel):
         Clear all of the tags that have been defined in the text.
         '''
         self.text.tag_remove('tagMarker', '1.0', 'end')
-
+        self.srch_pattern.set('')
 
 class Logger:
     '''

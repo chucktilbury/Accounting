@@ -1,6 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from logger import *
+from system.logger import *
 
 @class_wrapper
 class Notebook(tk.Frame):

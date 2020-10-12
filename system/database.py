@@ -6,7 +6,8 @@ that interfaces to the form widgets.
 import sqlite3 as sql
 import os, time, locale
 from tkinter.messagebox import showerror
-from logger import *
+from system.logger import *
+
 @class_wrapper
 class Database(object):
 

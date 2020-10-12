@@ -1,8 +1,8 @@
 
 from tkinter.messagebox import showwarning, showerror, showinfo
 import sys, os, csv
-from database import Database
-from logger import *
+from system.database import Database
+from system.logger import *
 
 
 @class_wrapper

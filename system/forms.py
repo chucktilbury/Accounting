@@ -17,10 +17,10 @@ to take up the entire column. Otherwise, the label will be considered a part of 
 column.
 '''
 
-from database import Database
-from form_widgets import *
-from select_dialog import SelectDialog
-from logger import *
+from system.database import Database
+from system.logger import *
+from widgets.form_widgets import *
+from dialogs.select_dialog import SelectDialog
 
 @class_wrapper
 class Forms(tk.LabelFrame):

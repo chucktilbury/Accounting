@@ -5,14 +5,14 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter.messagebox import showinfo, askyesno, askokcancel
 from tkinter.filedialog import askopenfilename
-from database import Database
+from system.database import Database
 
-from notebook import Notebook
+from system.notebook import Notebook
 #from setup_forms import *
 #from main_forms import *
 #from dialogs import HelpDialog
-from importer import ImportPayPal
-from logger import *
+from policy.importer import ImportPayPal
+from system.logger import *
 
 @class_wrapper
 class MainFrame(object):

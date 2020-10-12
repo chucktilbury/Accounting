@@ -1,9 +1,9 @@
 
 import tkinter as tk
 import tkinter.ttk as ttk
-from database import Database
-from search_widget import searchWidget
-from logger import *
+from system.database import Database
+from widgets.search_widget import searchWidget
+from system.logger import *
 
 @class_wrapper
 class SelectDialog(tk.Toplevel):

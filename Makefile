@@ -14,6 +14,15 @@ all: $(TARGET)
 
 $(TARGET): $(DEPS)
 	pyinstaller -F -n accounting system/main.py
+	make -C sql
 
 clean:
-	-rm -rf *.spec dist/ build/ __pycache__
+	-rm -rf *.spec *.db \
+		dist/ \
+		build/ \
+		system/__pycache__/ \
+		dialogs/__pycache__/ \
+		policy/__pycache__/ \
+		widgets/__pycache__/ \
+		__pycache__/
+	make -C sql clean

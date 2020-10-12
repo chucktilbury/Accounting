@@ -29,23 +29,24 @@ class Database(object):
 
         # put the stuff here to open the database file and all.
         self.data_version = '1.0'
-        self.database_name = 'sql/testing.db'
-        self.db_create_file = 'sql/database.sql'
-        self.db_pop_file = 'sql/populate.sql'
+        self.database_name = 'accounting.db'
+        # self.database_name = 'sql/testing.db'
+        # self.db_create_file = 'sql/database.sql'
+        # self.db_pop_file = 'sql/populate.sql'
         self.open()
-        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-        self.db.execute('PRAGMA case_sensitive_like = false;')
 
     @func_wrapper
     def open(self):
         '''
         High level database open routine. Handles creating the database if it's not found.
         '''
-        if not os.path.isfile(self.database_name):
-            self.create_database()
+        # if not os.path.isfile(self.database_name):
+        #     self.create_database()
 
         self.db = sql.connect(self.database_name)
         self.db.row_factory = sql.Row
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+        self.db.execute('PRAGMA case_sensitive_like = false;')
 
     @func_wrapper
     def close(self):
@@ -55,54 +56,54 @@ class Database(object):
         self.db.commit()
         self.db.close()
 
-    @func_wrapper
-    def read_statement(self, fh):
-        '''
-        Read a statement from the *.sql file and return it. This skips comments and concatinates lines
-        until a ';' is read.
+    # @func_wrapper
+    # def read_statement(self, fh):
+    #     '''
+    #     Read a statement from the *.sql file and return it. This skips comments and concatinates lines
+    #     until a ';' is read.
 
-        A comment is text that starts with a '#' and continues to the end of the line.
-        '''
-        retv = ''
-        for line in fh:
-            # strip comments from the line
-            idx = line.find('#')
-            line = line[0:idx].strip()
-            # If there is anything left, append it to the return value.
-            if len(line) > 0:
-                retv += " %s"%(line)
-                if line[-1] == ';':
-                    break
+    #     A comment is text that starts with a '#' and continues to the end of the line.
+    #     '''
+    #     retv = ''
+    #     for line in fh:
+    #         # strip comments from the line
+    #         idx = line.find('#')
+    #         line = line[0:idx].strip()
+    #         # If there is anything left, append it to the return value.
+    #         if len(line) > 0:
+    #             retv += " %s"%(line)
+    #             if line[-1] == ';':
+    #                 break
 
-        return retv
+    #     return retv
 
-    @func_wrapper
-    def run_file(self, db, name):
-        '''
-        Execute all of the statements in a *.sql file.
-        '''
-        with open(name) as fh:
-            while True:
-                line = self.read_statement(fh)
-                if len(line) > 0:
-                    #print(line)
-                    db.execute(line)
-                else:
-                    break
+    # @func_wrapper
+    # def run_file(self, db, name):
+    #     '''
+    #     Execute all of the statements in a *.sql file.
+    #     '''
+    #     with open(name) as fh:
+    #         while True:
+    #             line = self.read_statement(fh)
+    #             if len(line) > 0:
+    #                 #print(line)
+    #                 db.execute(line)
+    #             else:
+    #                 break
 
-    @func_wrapper
-    def create_database(self):
-        '''
-        Create the database if it does not exist already.
-        '''
-        # Load the DB creation file and create the database from that.
+    # @func_wrapper
+    # def create_database(self):
+    #     '''
+    #     Create the database if it does not exist already.
+    #     '''
+    #     # Load the DB creation file and create the database from that.
 
-        c = sql.connect(self.database_name)
-        db = c.cursor()
-        self.run_file(db, self.db_create_file)
-        self.run_file(db, self.db_pop_file)
-        c.commit()
-        c.close()
+    #     c = sql.connect(self.database_name)
+    #     db = c.cursor()
+    #     self.run_file(db, self.db_create_file)
+    #     self.run_file(db, self.db_pop_file)
+    #     c.commit()
+    #     c.close()
 
     @func_wrapper
     def commit(self):

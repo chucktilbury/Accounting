@@ -6,7 +6,7 @@
 
 ## TODO:
 * ~~Add a search functionality to the logger dialog.~~
-* Organize app into directories to keep the forms and other source separate.
+* ~~Organize app into directories to keep the forms and other source separate.~~
 * Add the application state to the database.
   * create a "forms" table where the status of forms is saved.
   * create an "app" table where status of the app is stored.

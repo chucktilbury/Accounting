@@ -10,8 +10,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.font as font
 from tkinter.messagebox import *
-from database import Database
-from logger import *
+from system.database import Database
+from system.logger import *
 
 class toolTip:
     '''

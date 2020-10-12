@@ -1,6 +1,6 @@
 import tkinter as tk
-from forms import Forms
-from logger import *
+from system.forms import Forms
+from system.logger import *
 
 @class_wrapper
 class _text_form(Forms):

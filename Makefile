@@ -1,5 +1,5 @@
 TARGET	=	accounting
-DEPS	=	main.py \
+DEPS	=	system/main.py \
 			system/database.py \
 			system/forms.py \
 			system/logger.py \
@@ -13,7 +13,7 @@ DEPS	=	main.py \
 all: $(TARGET)
 
 $(TARGET): $(DEPS)
-	pyinstaller -F -n accounting main.py
+	pyinstaller -F -n accounting system/main.py
 
 clean:
 	-rm -rf *.spec dist/ build/ __pycache__

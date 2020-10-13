@@ -30,7 +30,6 @@ class Database(object):
         # put the stuff here to open the database file and all.
         self.data_version = '1.0'
         self.database_name = 'accounting.db'
-        # self.database_name = 'sql/testing.db'
         # self.db_create_file = 'sql/database.sql'
         # self.db_pop_file = 'sql/populate.sql'
         self.open()

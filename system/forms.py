@@ -134,7 +134,7 @@ class Forms(tk.LabelFrame):
         '''
         This is the formCombobox control.
         '''
-        widget = formText(self.ctl_frame, self.table, column, pop_tab, pop_col, tool_tip=ttip, **kw)
+        widget = formCombobox(self.ctl_frame, self.table, column, pop_tab, pop_col, tool_tip=ttip, **kw)
         self._grid(widget, cols, sticky='w')
         self.ctl_list.append(widget)
         return widget
@@ -211,10 +211,10 @@ class Forms(tk.LabelFrame):
             if class_name is None:
                 raise Exception("New button requires a class to be specified.")
             command = lambda c=class_name: self._new_btn(c)
-        elif title == 'Edit':
-            if class_name is None:
-                raise Exception("Edit button requires a class to be specified.")
-            command = lambda c=class_name: self._edit_btn(c)
+        # elif title == 'Edit':
+        #     if class_name is None:
+        #         raise Exception("Edit button requires a class to be specified.")
+        #     command = lambda cn=class_name, col=column: self._edit_btn(cn, col)
         elif title == 'Select':
             if column is None:
                 raise Exception("Select button requires a column to be specified.")
@@ -223,6 +223,15 @@ class Forms(tk.LabelFrame):
             raise Exception("Unknown control button type: %s"%(title))
 
         widget = tk.Button(self.btn_frame, text=title, width=self.btn_width, command=command, **kw)
+        widget.grid(row=self.btn_row, column=0, padx=self.btn_xpad, sticky='nw')
+        self.btn_row += 1
+        return widget
+
+    @func_wrapper
+    def add_edit_button(self, label, column, class_name, **kw):
+
+        cmd = lambda cn=class_name, co=column: self._edit_btn(cn, co)
+        widget = tk.Button(self.btn_frame, text=label, width=self.btn_width, command=cmd, **kw)
         widget.grid(row=self.btn_row, column=0, padx=self.btn_xpad, sticky='nw')
         self.btn_row += 1
         return widget
@@ -390,11 +399,11 @@ class Forms(tk.LabelFrame):
             self.load_form()
 
     @func_wrapper
-    def _edit_btn(self, _class):
+    def _edit_btn(self, _class, col):
         '''
         Call up the edit dialog for this table row.
         '''
-        _class(self.owner, self.row_index)
+        _class(self.owner, self.table, col, self._row_id())
         self.load_form()
 
     @func_wrapper

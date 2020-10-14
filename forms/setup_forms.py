@@ -9,6 +9,8 @@ class BusinessForm(Forms):
     '''
 
     def __init__(self, notebook):
+        self.logger.set_level(Logger.DEBUG)
+
         index = notebook.get_tab_index('Business')
         super().__init__(notebook.frame_list[index]['frame'], 'Business', columns=4)
         notebook.frame_list[index]['show_cb'] = self.load_form
@@ -53,6 +55,8 @@ class BusinessForm(Forms):
 class AccountsForm(Forms):
 
     def __init__(self, notebook):
+        self.logger.set_level(Logger.DEBUG)
+
         index = notebook.get_tab_index('Accounts')
         super().__init__(notebook.frame_list[index]['frame'], 'Account')
         notebook.frame_list[index]['show_cb'] = self.load_form
@@ -87,6 +91,8 @@ class AccountsForm(Forms):
 class InventoryForm(Forms):
 
     def __init__(self, notebook):
+        self.logger.set_level(Logger.DEBUG)
+
         index = notebook.get_tab_index('Inventory')
         super().__init__(notebook.frame_list[index]['frame'], 'InventoryItem')
         notebook.frame_list[index]['show_cb'] = self.load_form

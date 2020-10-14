@@ -16,8 +16,8 @@ class Notebook(tk.Frame):
         tabs    =   List of tabs to create.
         **kw    =   Named args passed to the frame.
         '''
-        super().__init__(owner, **kw)
         self.logger.set_level(Logger.DEBUG)
+        super().__init__(owner, **kw)
 
         self.owner = owner
         self.frame_list = []
@@ -60,11 +60,13 @@ class Notebook(tk.Frame):
         self.frame_list[self.crnt_index]['frame'].grid_forget()
         self.frame_list[self.crnt_index]['button'].configure(relief='raised')
         if not self.frame_list[self.crnt_index]['hide_cb'] is None:
+            self.logger.debug('hide frame %d'%(index))
             self.frame_list[self.crnt_index]['hide_cb']()
 
         self.frame_list[index]['frame'].grid(row=1, column=0, sticky='sw')
         self.frame_list[index]['button'].configure(relief='sunken')
         if not self.frame_list[index]['show_cb'] is None:
+            self.logger.debug('show frame %d'%(index))
             self.frame_list[index]['show_cb']()
 
         self.crnt_index = index

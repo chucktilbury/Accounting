@@ -1,6 +1,7 @@
 import tkinter as tk
 from system.forms import Forms
 from system.logger import *
+from .base_dialog import BaseFormDialog
 
 @class_wrapper
 class _text_form(Forms):
@@ -14,61 +15,30 @@ class _text_form(Forms):
         self.add_text(column, 1, width=70, height=20)
         self.add_ctl_button('Save')
 
-
 @class_wrapper
-class _text_dialog(tk.Toplevel):
-    '''
-    Display a text edit form and possibly save the results.
-    '''
-
-    def __init__(self, owner, table, column, row_index, thing=None):
-        super().__init__(owner)
-        self.transient(owner)
-
-        if thing is None:
-            label = 'Info'
-        else:
-            label = thing
-
-
-        self.title('Edit %s'%(label))
-
-        self.upper_frame = tk.Frame(self)
-        self.upper_frame.grid(row=0, column=0)
-        self.lower_frame = tk.LabelFrame(self)
-        self.lower_frame.grid(row=1, column=0)
-
-        self.cf = _text_form(self.upper_frame, table, column, row_index, label)
-        self.cf.grid()
-        tk.Button(self.lower_frame, text='Dismiss', command=self._dismiss_btn).grid()
-        self.cf.load_form()
-        self.wait_window(self)
-
-    @func_wrapper
-    def _dismiss_btn(self):
-        self.cf.check_save()
-        self.destroy()
-
-@class_wrapper
-class EditNotes(_text_dialog):
+class EditNotes(BaseFormDialog):
 
     def __init__(self, owner, table, column, row):
-        super().__init__(owner, table, column, row, 'Notes')
+        super().__init__(owner, _text_form, table, row, column, 'Notes')
+        self.load_form()
 
 @class_wrapper
-class EditTerms(_text_dialog):
+class EditTerms(BaseFormDialog):
 
     def __init__(self, owner, table, column, row):
-        super().__init__(owner, table, column, row, 'Terms')
+        super().__init__(owner, _text_form, table, row, column, 'Terms')
+        self.load_form()
 
 @class_wrapper
-class EditWarranty(_text_dialog):
+class EditWarranty(BaseFormDialog):
 
     def __init__(self, owner, table, column, row):
-        super().__init__(owner, table, column, row, 'Warranty')
+        super().__init__(owner, _text_form, table, row, column, 'Warranty')
+        self.load_form()
 
 @class_wrapper
-class EditReturns(_text_dialog):
+class EditReturns(BaseFormDialog):
 
     def __init__(self, owner, table, column, row):
-        super().__init__(owner, table, column, row, 'Returns')
+        super().__init__(owner, _text_form, table, row, column, 'Returns')
+        self.load_form()

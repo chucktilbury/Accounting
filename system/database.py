@@ -261,7 +261,7 @@ class Database(object):
             where = '%'+str(value)+'%' #'%s%s%s'%('%', str(value), '%') # enclose the result in '%'s
             line = 'SELECT * FROM %s WHERE %s LIKE %s'%(table, column, where)
 
-        print(line)
+        self.logger.debug(line)
         cur = self.db.execute(line)
         retv = []
         for item in cur:

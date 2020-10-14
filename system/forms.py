@@ -32,6 +32,7 @@ class Forms(tk.LabelFrame):
         columns    = number of widget columns in the form
         form_width = size of the form in pixels, including buttons
         '''
+        self.logger.set_level(Logger.DEBUG)
         super().__init__(owner, **kw)
 
         self.table = table # database table this form will reference
@@ -154,7 +155,7 @@ class Forms(tk.LabelFrame):
         '''
         This is the formIndirectLabel control.
         '''
-        widget = formIndirectLabel(self.ctl_frame, self.table, column, tool_tip=ttip, **kw)
+        widget = formIndirectLabel(self.ctl_frame, self.table, column, rem_tab, rem_col, tool_tip=ttip, **kw)
         self._grid(widget, cols, sticky='w')
         self.ctl_list.append(widget)
         return widget
@@ -191,7 +192,7 @@ class Forms(tk.LabelFrame):
 
     # Methods that add button widgets to the form
     @func_wrapper
-    def add_ctl_button(self, title, column=None, class_name=None, thing=None, **kw):
+    def add_ctl_button(self, title, column=None, thing=None, new_flag=False, **kw):
         '''
         This adds a known control button to the form.
         '''
@@ -206,11 +207,11 @@ class Forms(tk.LabelFrame):
         elif title == 'Delete':
             command = self._delete_btn
         elif title == 'Save':
-            command = self._save_btn
-        elif title == 'New':
-            if class_name is None:
-                raise Exception("New button requires a class to be specified.")
-            command = lambda c=class_name: self._new_btn(c)
+            command = lambda nf=new_flag: self._save_btn(nf)
+        # elif title == 'New':
+        #     if class_name is None:
+        #         raise Exception("New button requires a class to be specified.")
+        #     command = lambda c=class_name: self._new_btn(c)
         # elif title == 'Edit':
         #     if class_name is None:
         #         raise Exception("Edit button requires a class to be specified.")
@@ -237,11 +238,12 @@ class Forms(tk.LabelFrame):
         return widget
 
     @func_wrapper
-    def add_custom_button(self, cls, **kw):
+    def add_custom_button(self, label, class_name, **kw):
         '''
         This adds a custom button from a self-contained class.
         '''
-        widget = cls(self.btn_frame, **kw)
+        cmd = lambda cn=class_name: self._custom_btn(cn)
+        widget = tk.Button(self.btn_frame, text=label, width=self.btn_width, command=cmd, **kw)
         widget.grid(row=self.btn_row, column=0, padx=self.btn_xpad, sticky='nw')
         self.btn_row += 1
         return widget
@@ -263,22 +265,26 @@ class Forms(tk.LabelFrame):
         '''
         Call all of the setter functions for all of the widgets.
         '''
+        self.logger.debug('row list size = %d'%(len(self.row_list)))
         if len(self.row_list) == 0:
             showinfo('Records', 'There are no records to show for this form.')
             return
 
+        self.logger.debug('row index = %d, row ID = %d'%(self.row_index, self._row_id()))
         for item in self.ctl_list:
             item.set_row_id(self._row_id())
             item.setter() # set the widget value
             item.is_changed(clear_flag=True) # reset the changed flag
 
     @func_wrapper
-    def save_form(self):
+    def save_form(self, new_flag=False):
         '''
         Call all of the getter functions for all of the widgets.
         '''
         #print(self.new_flag)
-        if self.new_flag:
+        #if self.new_flag:
+        # TODO: Check for duplicates
+        if new_flag:
             data = {}
             for item in self.ctl_list:
                 key, val = item.get_insert_value()
@@ -303,6 +309,14 @@ class Forms(tk.LabelFrame):
 
         self.data.commit()
         showinfo('Info', 'Form saved.')
+
+    @func_wrapper
+    def clear_form(self):
+        '''
+        Simply call *.clear() for all of the controls.
+        '''
+        for item in self.ctl_list:
+            item.clear()
 
     @func_wrapper
     def show_form(self):
@@ -354,11 +368,10 @@ class Forms(tk.LabelFrame):
         '''
         Clear the form or open the edit dialog.
         '''
-        for item in self.ctl_list:
-            item.clear()
+        self.clear_form()
 
     @func_wrapper
-    def _save_btn(self):
+    def _save_btn(self, new_flag=False):
         '''
         Call all of the getter functions for all of the controls and
         commit the database changes.
@@ -376,13 +389,14 @@ class Forms(tk.LabelFrame):
             if askyesno('Save Record?',
                     'There are %d item(s) that may be duplicates of this.\n'%(l)+
                     'Do you want to continue?'):
-                self.save_form()
+                self.save_form(new_flag)
             else:
                 return
         # verify that the record is to be saved.
         else:
             #if askyesno('Save Record?', 'Are you sure you want to save this?'):
-            self.save_form()
+            self.save_form(new_flag)
+        self.load_form()
 
     @func_wrapper
     def _delete_btn(self):
@@ -403,7 +417,7 @@ class Forms(tk.LabelFrame):
         '''
         Call up the edit dialog for this table row.
         '''
-        _class(self.owner, self.table, col, self._row_id())
+        _class(self.owner, self.table, col, self.row_index)
         self.load_form()
 
     @func_wrapper
@@ -421,15 +435,24 @@ class Forms(tk.LabelFrame):
             self.load_form()
         # else cancel was selected
 
+    # @func_wrapper
+    # def _new_btn(self, _class):
+    #     '''
+    #     Simply create a new table record and store it in the database.
+    #     '''
+    #     self.check_save()
+    #     #self.new_flag = True
+    #     _class(self.owner)
+    #     self._init_row_list()
+
     @func_wrapper
-    def _new_btn(self, _class):
+    def _custom_btn(self, class_name):
         '''
-        Simply create a new table record and store it in the database.
+        Invoke the class that was passed as a parameter.
         '''
-        self.check_save()
-        #self.new_flag = True
-        _class(self.owner)
+        class_name(self.owner, self.table, self.row_index)
         self._init_row_list()
+        self.load_form()
 
     # Other private functions
     @func_wrapper
@@ -468,7 +491,9 @@ class Forms(tk.LabelFrame):
         Return the current row_id
         '''
         #print('list:', self.row_list, 'index:', self.row_index)
-        if self.row_list is None:
+        self.logger.debug('len row list = %d, row index = %d'%(len(self.row_list), self.row_index))
+        #if self.row_list is None:
+        if len(self.row_list) == 0:
             return 0
 
         return self.row_list[self.row_index]

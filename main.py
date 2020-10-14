@@ -9,6 +9,7 @@ from system.database import Database
 
 from system.notebook import Notebook
 from forms.setup_forms import *
+from forms.main_forms import *
 #from main_forms import *
 #from dialogs import HelpDialog
 from policy.importer import ImportPayPal
@@ -52,9 +53,9 @@ class MainFrame(object):
 
         # TODO: Show balance/P&L sheet on home tab.
         nb1 = Notebook(self.master, ['Home', 'Customers', 'Vendors', 'Sales', 'Purchases', 'Setup'])
-        #CustomersForm(nb1)
-        #VendorsForm(nb1)
-        nb1.show_tab(0)
+        CustomersForm(nb1)
+        VendorsForm(nb1)
+        nb1.show_tab(1)
 
         nb2 = Notebook(nb1.get_frame(nb1.get_tab_index('Setup')), ['Business', 'Accounts', 'Inventory'])
         BusinessForm(nb2)
@@ -109,7 +110,7 @@ class MainFrame(object):
 
 if __name__ == "__main__":
     master = tk.Tk()
-    master.geometry('950x500')
+    master.geometry('950x700')
     #master.resizable(0, 0)
     master.wm_title("Accounting")
 

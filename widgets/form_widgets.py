@@ -282,7 +282,17 @@ class formCombobox(_form_widget_base):
     def setter(self):
         self.populate()
         value = self.data.read_single_value(self.table, self.column, self.row_id)
-        self.widget.current(int(value)-1)
+        # Bug Fix.
+        # the value in the database can never be 0 or None. It has to be a row ID
+        # of a table, which starts at 1. So, if we find a None or a 0 here, set it
+        # to a reasonable default.
+        if value is None or value == 0:
+            self.data.write_single_value(self.table, self.column, self.row_id, 1)
+            self.data.commit()
+            self.widget.current(0)
+        else:
+            # add or subtract 1 to convert database value to widget index.
+            self.widget.current(int(value)-1)
 
     @func_wrapper
     def clear(self):
@@ -297,7 +307,9 @@ class formCombobox(_form_widget_base):
 
     @func_wrapper
     def _read_value(self):
-        return self.widget.current()+1
+        val = self.widget.current()+1
+        self.logger.debug('combo read value = %d'%(val))
+        return val
 
 @class_wrapper
 class formDynamicLabel(_form_widget_base):
@@ -319,6 +331,14 @@ class formDynamicLabel(_form_widget_base):
             self.value.set('')
         else:
             self.value.set(str(value))
+
+    @func_wrapper
+    def getter(self):
+        pass
+
+    @func_wrapper
+    def _read_value(self):
+        pass
 
 @class_wrapper
 class formIndirectLabel(_form_widget_base):

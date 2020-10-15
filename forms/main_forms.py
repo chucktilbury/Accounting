@@ -44,25 +44,21 @@ class CustomersForm(Forms):
         self.add_label('Zip Code:')
         self.add_dynamic_label('zip', 1, bg='white', width=width2, anchor='w')
         self.add_label('Country:')
-        #self.add_combo('country_ID', 1, 'Country', 'name')
         self.add_indirect_label('country_ID', 1, 'Country', 'name', bg='white', width=width2, anchor='w')
 
         self.add_label('Email:')
         self.add_dynamic_label('email_address', 1, bg='white', width=width2, anchor='w')
         self.add_label('Email Status:')
-        #self.add_combo('email_status_ID', 1, 'EmailStatus', 'name')
         self.add_indirect_label('email_status_ID', 1, 'EmailStatus', 'name', bg='white', width=width2, anchor='w')
 
         self.add_label('Phone:')
         self.add_dynamic_label('phone_number', 1, bg='white', width=width2, anchor='w')
         self.add_label('Phone Status:')
-        #self.add_combo('phone_status_ID', 1, 'PhoneStatus', 'name')
         self.add_indirect_label('phone_status_ID', 1, 'PhoneStatus', 'name', bg='white', width=width2, anchor='w')
 
         self.add_label('Web Site:')
         self.add_dynamic_label('web_site', 1, bg='white', width=width2, anchor='w')
         self.add_label('Class:')
-        #self.add_combo('class_ID', 1, 'ContactClass', 'name')
         self.add_indirect_label('class_ID', 1, 'ContactClass', 'name', bg='white', width=width2, anchor='w')
 
         self.add_label('Description:')
@@ -126,19 +122,16 @@ class VendorsForm(Forms):
         self.add_label('Zip Code:')
         self.add_dynamic_label('zip', 1, bg='white', width=width2, anchor='w')
         self.add_label('Country:')
-        #self.add_combo('country_ID', 1, 'Country', 'name')
         self.add_indirect_label('country_ID', 1, 'Country', 'name', bg='white', width=width2, anchor='w')
 
         self.add_label('Email:')
         self.add_dynamic_label('email_address', 1, bg='white', width=width2, anchor='w')
         self.add_label('Email Status:')
-        #self.add_combo('email_status_ID', 1, 'EmailStatus', 'name')
         self.add_indirect_label('email_status_ID', 1, 'EmailStatus', 'name', bg='white', width=width2, anchor='w')
 
         self.add_label('Phone:')
         self.add_dynamic_label('phone_number', 1, bg='white', width=width2, anchor='w')
         self.add_label('Phone Status:')
-        #self.add_combo('phone_status_ID', 1, 'PhoneStatus', 'name')
         self.add_indirect_label('phone_status_ID', 1, 'PhoneStatus', 'name', bg='white', width=width2, anchor='w')
 
         self.add_label('Web Site:')

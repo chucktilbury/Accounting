@@ -116,7 +116,7 @@ class Database(object):
         '''
         Execute a single SQL statement.
         '''
-        #print('execute: sql = %s, data = %s'%(sql, str(data)))
+        self.logger.debug('execute: sql = %s, data = %s'%(sql, str(data)))
         try:
             if data is None:
                 return self.db.execute(_sql)
@@ -165,6 +165,7 @@ class Database(object):
             retv.append(' '.join(item))
         return retv
 
+    # TODO: This is duplicate code... See get_id_by_column() Keep this. Dump the other.
     @func_wrapper
     def get_row_id(self, table, column, value):
         '''
@@ -200,6 +201,7 @@ class Database(object):
 
         return retv
 
+    # TODO: This is the same code as get_row_id()
     @func_wrapper
     def get_id_by_column(self, table, column, val):
         '''
@@ -238,6 +240,23 @@ class Database(object):
             return None
 
     @func_wrapper
+    def update_row(self, table, rec, id):
+        '''
+        Update a row using a dictionary and the id of the row. This expects a dictionary where the keys are
+        the column names and the data is the value to be placed in the columns.
+        '''
+        keys = '=?,'.join(rec.keys())
+        keys += '=?'
+        vals = tuple(rec.values())
+
+        try:
+            line = 'UPDATE %s SET %s WHERE ID = %d;'%(table, keys, id)
+            return self.db.execute(line, vals)
+        except sql.IntegrityError as e:
+            showerror('ERROR', str(e))
+            return None
+
+    @func_wrapper
     def delete_row(self, table, row_id):
         '''
         Delete the row with the given ID.
@@ -256,7 +275,7 @@ class Database(object):
             val = ' '.join(value.split())   # get rid of duplicate spaces
             val = val.replace(' ', '%')     # replace the spaces with '%'
             where = '%'+str(value)+'%'
-            line = 'SELECT * FROM %s WHERE %s LIKE \'%s\''%(table, column, where)
+            line = 'SELECT * FROM %s WHERE %s LIKE \"%s\"'%(table, column, where)
         else:
             where = '%'+str(value)+'%' #'%s%s%s'%('%', str(value), '%') # enclose the result in '%'s
             line = 'SELECT * FROM %s WHERE %s LIKE %s'%(table, column, where)
@@ -268,3 +287,31 @@ class Database(object):
             retv.append(dict(item))
 
         return retv
+
+    @func_wrapper
+    def get_row(self, table, row_id):
+        '''
+        Return a dict of all of the columns in the row that has the specified ID.
+        '''
+        curs = self.execute('SELECT * FROM %s WHERE ID = %d;'%(table, row_id)).fetchall()
+        try:
+            retv = dict(curs[0])
+            return retv
+        except IndexError:
+            return None
+
+    @func_wrapper
+    def get_row_list(self, table, where):
+        '''
+        Get a generic list of rows based on more than one criteria
+        '''
+        retv = []
+        sql = 'SELECT * FROM %s WHERE %s'%(table, where)
+        cur = self.execute(sql)
+        for item in cur:
+            retv.append(dict(item))
+
+        if len(retv) == 0:
+            return None
+        else:
+            return retv

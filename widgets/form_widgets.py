@@ -356,23 +356,28 @@ class formIndirectLabel(_form_widget_base):
         if not tool_tip is None:
             self.tool_tip = toolTip(self, tool_tip)
 
-    @func_wrapper
-    def getter(self):
-        # This is the name
-        value = self.value.get()
-        # find the row ID where the name matches in the rem_tab
-        id = self._read_value()
-        # set the value with the row_id
-        self.data.write_single_value(self.table, self.column, self.row_id, id)
+    # @func_wrapper
+    # def getter(self):
+    #     # This is the name
+    #     value = self.value.get()
+    #     # find the row ID where the name matches in the rem_tab
+    #     self.row_id = self._read_value()
+    #     # set the value with the row_id
+    #     self.data.write_single_value(self.table, self.column, self.row_id, id)
 
     @func_wrapper
     def setter(self):
         # this is the ID
+        self.logger.debug("indirect label setter: table = %s, column = %s, row_id = %s"%(self.table, self.column, self.row_id))
         id = self.data.read_single_value(self.table, self.column, self.row_id)
-        # find the value with the row ID in the table
-        value = self.data.read_single_value(self.rem_tab, self.rem_col, id)
-        # set the widget value
-        self.value.set(str(value))
+        if id is None:
+            self.value.set('')
+        else:
+            # find the value with the row ID in the table
+            value = self.data.read_single_value(self.rem_tab, self.rem_col, id)
+            # set the widget value
+            self.value.set(str(value))
+
 
     @func_wrapper
     def clear(self):

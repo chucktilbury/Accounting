@@ -1,6 +1,7 @@
 
 from tkinter.messagebox import showwarning, showerror, showinfo
-import sys, os, csv
+import csv
+import locale
 from system.database import Database
 from system.logger import *
 
@@ -89,8 +90,8 @@ class ImportPayPal(object):
 
             showinfo('Import', text)
 
-        except Exception:
-            showerror("ERROR", 'Could not import file: "%s"'%(self.fname))
+        except Exception as e:
+            showerror("ERROR", 'Could not import file: %s because %s'%(self.fname, str(e)))
 
     @func_wrapper
     def _read_file(self):
@@ -115,6 +116,7 @@ class ImportPayPal(object):
                     #if item == '':
                     #    rec[self.legend[idx]] = None
                     #else:
+                    #self.logger.debug('item = %s'%(str(item))) # bug: performance issue
                     rec[self.legend[idx]] = item
                     rec['imported_country'] = False
                     rec['imported_customer'] = False
@@ -122,7 +124,7 @@ class ImportPayPal(object):
                     rec['imported_sale'] = False
                     rec['imported_purchase'] = False
 
-                if not self.data.if_rec_exists('RawImport', 'TransactionID', rec['TransactionID']):
+                if not self.data.check_dups('RawImport', 'TransactionID', rec['TransactionID']):
                     self.data.insert_row('RawImport', rec)
                     self.accepted += 1
                 else:
@@ -141,12 +143,12 @@ class ImportPayPal(object):
 
         count = 0
         for item in data:
-            if item['CountryCode'] != '' and not self.data.if_rec_exists('Country', 'abbreviation', item['CountryCode']):
+            if item['CountryCode'] != '' and not self.data.check_dups('Country', 'abbreviation', item['CountryCode']):
                 rec = {'name': item['Country'],
                         'abbreviation': item['CountryCode']}
                 self.data.insert_row('Country', rec)
                 count += 1
-            self.data.update_row_by_id('RawImport', {'imported_country':True}, item['ID'])
+            self.data.update_row('RawImport', {'imported_country':True}, item['ID'])
 
         self.data.commit()
         return count
@@ -165,7 +167,7 @@ class ImportPayPal(object):
         for item in data:
             if item['Type'] == 'Website Payment' or item['Type'] == 'General Payment':
                 # Yes it's a customer
-                if not self.data.if_rec_exists('Customer', 'name', item['Name']):
+                if not self.data.check_dups('Customer', 'name', item['Name']):
                     rec = { 'date_created': item['Date'],
                             'name': item['Name'],
                             'address1': item['AddressLine1'],
@@ -174,19 +176,19 @@ class ImportPayPal(object):
                             'city': item['City'],
                             'zip': item['PostalCode'],
                             'email_address': item['FromEmail'],
-                            'email_status_ID': self.data.get_id_by_row('EmailStatus', 'name', 'primary'),
+                            'email_status_ID': self.data.get_row_id('EmailStatus', 'name', 'primary'),
                             'phone_number': item['Phone'],
-                            'phone_status_ID': self.data.get_id_by_row('PhoneStatus', 'name', 'primary'),
+                            'phone_status_ID': self.data.get_row_id('PhoneStatus', 'name', 'primary'),
                             'description': 'Imported from PayPal',
                             'notes': item['Subject'],
-                            'country_ID': self.data.get_id_by_row('Country', 'abbreviation', item['CountryCode']),
-                            'class_ID': self.data.get_id_by_row('ContactClass', 'name', 'retail')}
+                            'country_ID': self.data.get_row_id('Country', 'abbreviation', item['CountryCode']),
+                            'class_ID': self.data.get_row_id('ContactClass', 'name', 'retail')}
 
                     self.data.insert_row('Customer', rec)
                     count+=1
                 # BUG: (fixed) When there are multiple instances of a name, the sale or purch record does not get imported
                 # because the imported_customer field does not get updated due to the duplicate name interlock.
-                self.data.update_row_by_id('RawImport', {'imported_customer':True}, item['ID'])
+                self.data.update_row('RawImport', {'imported_customer':True}, item['ID'])
         self.data.commit()
         return count
 
@@ -203,20 +205,20 @@ class ImportPayPal(object):
         count = 0
         for item in data:
             if item['Name'] != '' and item['Name'] != 'PayPal':
-                if not self.data.if_rec_exists('Vendor', 'name', item['Name']):
+                if not self.data.check_dups('Vendor', 'name', item['Name']):
                     rec = { 'date_created': item['Date'],
                             'name': item['Name'],
                             'contact_name':'',
                             'email_address': item['ToEmail'],
-                            'email_status_ID': self.data.get_id_by_row('EmailStatus', 'name', 'primary'),
+                            'email_status_ID': self.data.get_row_id('EmailStatus', 'name', 'primary'),
                             'phone_number': '',
-                            'phone_status_ID': self.data.get_id_by_row('PhoneStatus', 'name', 'primary'),
+                            'phone_status_ID': self.data.get_row_id('PhoneStatus', 'name', 'primary'),
                             'description': item['ItemTitle'],
                             'notes': item['Subject'],
-                            'type_ID': self.data.get_id_by_row('VendorType', 'name', 'unknown'),}
+                            'type_ID': self.data.get_row_id('VendorType', 'name', 'unknown'),}
 
                     self.data.insert_row('Vendor', rec)
-                    self.data.update_row_by_id('RawImport', {'imported_vendor':True}, item['ID'])
+                    self.data.update_row('RawImport', {'imported_vendor':True}, item['ID'])
                     count+=1
 
         self.data.commit()
@@ -236,19 +238,20 @@ class ImportPayPal(object):
         for item in data:
             if item['Name'] != '' and item['Name'] != 'PayPal':
                 rec = { 'date': item['Date'],
-                        'customer_ID': self.data.get_id_by_row('Customer', 'name', item['Name']),
+                        'customer_ID': self.data.get_row_id('Customer', 'name', item['Name']),
                         'raw_import_ID': int(item['ID']),
-                        'status_ID': self.data.get_id_by_row('SaleStatus', 'name', 'complete'),
+                        'status_ID': self.data.get_row_id('SaleStatus', 'name', 'complete'),
                         'transaction_uuid': item['TransactionID'],
-                        'gross': self.data.convert_value(item['Gross'], float),
-                        'fees': self.data.convert_value(item['Fee'], float),
-                        'shipping': self.data.convert_value(item['Shipping'], float),
+                        'gross': self.convert_value(item['Gross'], float),
+                        'fees': self.convert_value(item['Fee'], float),
+                        'shipping': self.convert_value(item['Shipping'], float),
+
                         'notes': item['Subject'] + '\n' +item['ItemTitle'],
                         'committed': False}
 
                 self.data.insert_row('SaleRecord', rec)
                 count+=1
-                self.data.update_row_by_id('RawImport', {'imported_sale':True}, item['ID'])
+                self.data.update_row('RawImport', {'imported_sale':True}, item['ID'])
 
         self.data.commit()
         return count
@@ -271,19 +274,57 @@ class ImportPayPal(object):
                 shipping = item['Shipping']
                 rec = { 'date': item['Date'],
                         'raw_import_ID': int(item['ID']),
-                        'vendor_ID': self.data.get_id_by_row('Vendor', 'name', item['Name']),
-                        'status_ID': self.data.get_id_by_row('PurchaseStatus', 'name', 'complete'),
-                        'type_ID': self.data.get_id_by_row('PurchaseType', 'name', 'unknown'),
+                        'vendor_ID': self.data.get_row_id('Vendor', 'name', item['Name']),
+                        'status_ID': self.data.get_row_id('PurchaseStatus', 'name', 'complete'),
+                        'type_ID': self.data.get_row_id('PurchaseType', 'name', 'unknown'),
                         'transaction_uuid': item['TransactionID'],
-                        'gross': self.data.convert_value(item['Gross'], float),
-                        'tax': self.data.convert_value(item['SalesTax'], float),
-                        'shipping': self.data.convert_value(item['Shipping'], float),
+                        'gross': self.convert_value(item['Gross'], float),
+                        'tax': self.convert_value(item['SalesTax'], float),
+                        'shipping': self.convert_value(item['Shipping'], float),
                         'notes': item['Subject'] + '\n' +item['ItemTitle'],
                         'committed': False}
 
                 self.data.insert_row('PurchaseRecord', rec)
-                self.data.update_row_by_id('RawImport', {'imported_purchase':True}, item['ID'])
+                self.data.update_row('RawImport', {'imported_purchase':True}, item['ID'])
                 count+=1
 
         self.data.commit()
         return count
+
+    @func_wrapper
+    def convert_value(self, val, value_type, abs_val=True):
+        '''
+        Convert the value to the specified type. The value_type is an actual python type name.
+        '''
+        retv = None
+        #try:
+        if type(val) is value_type:
+            retv = val
+        elif value_type is str:
+            retv = str(val)
+        else:
+            if value_type is float:
+                if type(val) is str:
+                    if val == '':
+                        retv = 0.0
+                    else:
+                        if abs_val:
+                            retv = abs(locale.atof(val))
+                        else:
+                            retv = locale.atof(val)
+                else:
+                    if abs_val:
+                        retv = abs(locale.atof(val))
+                    else:
+                        retv = locale.atof(val)
+
+            elif value_type is int:
+                if abs_val:
+                    retv = int(abs(locale.atof(val)))
+                else:
+                    retv = int(locale.atof(val))
+        # except:
+        #     self.logger.error('Cannot convert value')
+        #     exit(1)
+
+        return retv

@@ -55,6 +55,8 @@ class MainFrame(object):
         nb1 = Notebook(self.master, ['Home', 'Customers', 'Vendors', 'Sales', 'Purchases', 'Setup'])
         CustomersForm(nb1)
         VendorsForm(nb1)
+        SalesForm(nb1)
+        PurchaseForm(nb1)
         nb1.show_tab(1)
 
         nb2 = Notebook(nb1.get_frame(nb1.get_tab_index('Setup')), ['Business', 'Accounts', 'Inventory'])

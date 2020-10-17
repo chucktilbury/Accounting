@@ -401,7 +401,7 @@ class formTitle(_form_widget_base):
 class formCheckbox(_form_widget_base):
 
     def __init__(self, owner, table, column, tool_tip=None, **kw):
-        super().__init_(owner, table, column)
+        super().__init__(owner, table, column)
         self.logger.set_level(Logger.DEBUG)
 
         self.value = tk.BooleanVar()

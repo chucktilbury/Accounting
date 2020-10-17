@@ -1,6 +1,7 @@
 from system.forms import Forms
 from system.logger import *
-from dialogs.edit_dialogs import *
+#from dialogs.edit_dialogs import *
+from dialogs.select_dialog import *
 
 @class_wrapper
 class _edit_customer_form(Forms):
@@ -62,7 +63,8 @@ class _edit_customer_form(Forms):
     def add_edit_buttons(self):
         self.add_ctl_button('Prev')
         self.add_ctl_button('Next')
-        self.add_ctl_button('Select', 'name')
+        #self.add_ctl_button('Select', 'name')
+        self.add_select_button(SelectDialog, owner=self.owner ,table=self.table, column='name')
         self.add_btn_spacer()
         self.add_ctl_button('Save')
 
@@ -77,7 +79,7 @@ class EditCustomerForm(_edit_customer_form):
         self.logger.set_level(Logger.DEBUG)
         super().__init__(owner, row_index)
 
-        self.add_title('Edit Customer Form')
+        self.add_title('Edit Customer')
         self.add_form()
         self.add_edit_buttons()
         self.load_form()
@@ -90,7 +92,7 @@ class NewCustomerForm(_edit_customer_form):
         self.logger.set_level(Logger.DEBUG)
         super().__init__(owner, row_index)
 
-        self.add_title('New Customer Form')
+        self.add_title('New Customer')
         self.add_form()
         self.add_new_buttons()
         self.clear_form()

@@ -161,12 +161,12 @@ class Forms(tk.LabelFrame):
         return widget
 
     @func_wrapper
-    def add_checkbox(self, column, cols, ttip=None, **kw):
+    def add_checkbox(self, column, ttip=None, **kw):
         '''
         This is the formCheckbox control.
         '''
         widget = formCheckbox(self.ctl_frame, self.table, column, tool_tip=ttip, **kw)
-        self._grid(widget, cols, sticky='w')
+        self._grid(widget, 1, sticky='w')
         self.ctl_list.append(widget)
         return widget
 
@@ -216,10 +216,10 @@ class Forms(tk.LabelFrame):
         #     if class_name is None:
         #         raise Exception("Edit button requires a class to be specified.")
         #     command = lambda cn=class_name, col=column: self._edit_btn(cn, col)
-        elif title == 'Select':
-            if column is None:
-                raise Exception("Select button requires a column to be specified.")
-            command = lambda c=column, t=thing: self._select_btn(c, t)
+        # elif title == 'Select':
+        #     if column is None:
+        #         raise Exception("Select button requires a column to be specified.")
+        #     command = lambda c=column, t=thing: self._select_btn(c, t)
         else:
             raise Exception("Unknown control button type: %s"%(title))
 
@@ -229,8 +229,22 @@ class Forms(tk.LabelFrame):
         return widget
 
     @func_wrapper
-    def add_edit_button(self, label, column, class_name, **kw):
+    def add_select_button(self, class_name, **kw):
+        '''
+        This is intended to invoke a select button. It will return the selected row ID in
+        a var called cls.item_id. That is then used to populate the form.
+        '''
+        cmd = lambda cn=class_name, kw=kw: self._select_btn(cn, **kw)
+        widget = tk.Button(self.btn_frame, text='Select', width=self.btn_width, command=cmd)
+        widget.grid(row=self.btn_row, column=0, padx=self.btn_xpad, sticky='nw')
+        self.btn_row += 1
+        return widget
 
+    @func_wrapper
+    def add_edit_button(self, label, column, class_name, **kw):
+        '''
+        This is intended to create a text dialog to edit a multi-line text field.
+        '''
         cmd = lambda cn=class_name, co=column: self._edit_btn(cn, co)
         widget = tk.Button(self.btn_frame, text=label, width=self.btn_width, command=cmd, **kw)
         widget.grid(row=self.btn_row, column=0, padx=self.btn_xpad, sticky='nw')
@@ -242,8 +256,8 @@ class Forms(tk.LabelFrame):
         '''
         This adds a custom button from a self-contained class.
         '''
-        cmd = lambda cn=class_name: self._custom_btn(cn)
-        widget = tk.Button(self.btn_frame, text=label, width=self.btn_width, command=cmd, **kw)
+        cmd = lambda cn=class_name, kw=kw: self._custom_btn(cn, **kw)
+        widget = tk.Button(self.btn_frame, text=label, width=self.btn_width, command=cmd)#, **kw)
         widget.grid(row=self.btn_row, column=0, padx=self.btn_xpad, sticky='nw')
         self.btn_row += 1
         return widget
@@ -421,12 +435,13 @@ class Forms(tk.LabelFrame):
         self.load_form()
 
     @func_wrapper
-    def _select_btn(self, column, thing=None):
+    def _select_btn(self, class_name, **kw):
         '''
         Open the select dialog and select from the column in the row.
         '''
         self.check_save()
-        sd = SelectDialog(self.owner, self.table, column, thing)
+        #sd = SelectDialog(self.owner, self.table, column, thing)
+        sd = class_name(**kw)
         #print(sd.item_id)
         if sd.item_id is None:
             showerror('Error', 'Selection not found.')
@@ -446,11 +461,11 @@ class Forms(tk.LabelFrame):
     #     self._init_row_list()
 
     @func_wrapper
-    def _custom_btn(self, class_name):
+    def _custom_btn(self, class_name, **kw):
         '''
         Invoke the class that was passed as a parameter.
         '''
-        class_name(self.owner, self.table, self.row_index)
+        class_name(**kw) #self.owner, self.table, self.row_index)
         self._init_row_list()
         self.load_form()
 

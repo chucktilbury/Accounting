@@ -16,8 +16,12 @@ select the "OK" button.
 
 @class_wrapper
 class searchWidget(ttk.Combobox):
+    '''
+    This generates a list of items for a combo box. Placing characters in the combo
+    generates a list using the "LIKE" SQL keyword and presents a sorted list.
+    '''
 
-    def __init__(self, owner, table, column, tool_tip=swtt, **kw):
+    def __init__(self, owner, table, column, tool_tip=None, **kw):
         super().__init__(owner, **kw)
         self.logger.set_level(Logger.DEBUG)
 
@@ -32,7 +36,6 @@ class searchWidget(ttk.Combobox):
         self._generate_list()
 
     def _key_handler(self, event=None):
-        #print(event, self.get())
         self._generate_list()
 
     def _generate_list(self):
@@ -45,11 +48,9 @@ class searchWidget(ttk.Combobox):
         try:
             for item in cur:
                 lst.append(item[0])
-        except:
-            #print('exception')
-            pass
+        except Exception as e:
+            self.logger.debug('searchWidget exception: %s'%(str(e)))
 
         lst.sort()
-        #print(lst)
         self['values'] = lst
-        #self.set(lst[0])
+

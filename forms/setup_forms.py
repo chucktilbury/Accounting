@@ -1,6 +1,7 @@
 from system.forms import Forms
 from system.logger import *
 from dialogs.text_dialog import *
+from dialogs.select_dialog import *
 
 @class_wrapper
 class BusinessForm(Forms):
@@ -80,7 +81,8 @@ class AccountsForm(Forms):
         self.add_ctl_button('Prev')
         self.add_ctl_button('Next')
         self.add_btn_spacer()
-        self.add_ctl_button('Select', 'name')
+        #self.add_ctl_button('Select', 'name')
+        self.add_select_button(SelectDialog, owner=self.owner ,table=self.table, column='name')
         self.add_ctl_button('Clear')
         self.add_ctl_button('Save')
         self.add_ctl_button('Delete')
@@ -119,7 +121,8 @@ class InventoryForm(Forms):
         self.add_ctl_button('Prev')
         self.add_ctl_button('Next')
         self.add_btn_spacer()
-        self.add_ctl_button('Select', 'name')
+        #self.add_ctl_button('Select', 'name')
+        self.add_select_button(SelectDialog, owner=self.owner ,table=self.table, column='name')
         self.add_ctl_button('Clear')
         self.add_ctl_button('Save')
         self.add_ctl_button('Delete')
